@@ -8,7 +8,7 @@ Column name description for the associated future glacial lakes shapefiles. For 
 | *MIN_ELEV* | Deepest point of the lake |
 | *MAX_ELEV* | Lake surface elevation |
 | *MEAN_ELEV* | Mean lake elevation |
-| *DEPTH* | Lake depth [m] |
+| *DEPTH* | Maximum lake depth [m] |
 | *SRFC_AREA*| Lake surface area [m<sup>2</sup>] |
 | *VOLUME* | Lake volume [m<sup>3</sup>] |
 | *IMPCT_AREA* | Lake impact predisposition area [m<sup>2</sup>] |
