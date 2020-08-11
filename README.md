@@ -1,10 +1,11 @@
 ![GLAMoR](https://cryo-tools.org/wp-content/uploads/2020/07/GLAMoR-LOGO-400px.png)
 # Subglacial overdeepenings
-Shapefiles of subglacial overdeepenings representing possible locations of future glacial lakes in High Mountain Asia including a first-order GLOF hazard assessment at each site.
+With this dataset, we present the first inventory of subglacial overdeepenings indicating possible locations of future glacial lakes in High Mountain Asia. We include a first-order glacial lake outburst flood (GLOF) hazard assessment for each future lake.
 
 This dataset can be used for anticipating emerging threats and potentials connected to glacial lakes and as a basis for further studies at suspected GLOF hazard hotspots.
 
-This study is part of the [GLAMoR](https://hu.berlin/glamor) project. 
+The related study is part of the [GLAMoR](https://hu.berlin/glamor) project (Future **G**lacial **L**akes in High Mountain **A**sia -
+**Mo**deling and **R**isk Analysis) situated at the Geography Department of Humboldt-Universität zu Berlin. 
 
 ### Detailed information
 This dataset contains two shapefiles of subglacial overdeepenings in High Mountain Asia. 
