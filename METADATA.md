@@ -1,5 +1,5 @@
 ## Metadata
-Column name description for the associated future glacial lakes shapefiles. For more insight into the calculation of each parameter, please see the corresponding publication.
+Column name explanation for the associated future glacial lakes shapefiles. For more insight into the calculation of each parameter, please see the corresponding publication (currently in review).
 
 | Column name | Description |
 | ----------- | ----------- |
@@ -19,6 +19,6 @@ Column name description for the associated future glacial lakes shapefiles. For 
 
 ### Additional information
 
-Currently, both LHL_MEAN and LHL_MAX are only available for the shapefile containing the larger overdeepenings (surface area >10<sup>5</sup>  m<sup>2</sup>).
+At the moment, both LHL_MEAN and LHL_MAX are only available for the shapefile containing the larger overdeepenings (surface area >10<sup>5</sup>  m<sup>2</sup>).
 In this shapefile, overdeepenings with erroneous morphological characteristics (due to void filling errors in the DEM data) are excluded.
 However, they are still included in the shapefile containing the complete dataset of overdeepenings.

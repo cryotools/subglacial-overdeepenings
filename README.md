@@ -5,7 +5,7 @@ With this dataset, we present the first inventory of subglacial overdeepenings i
 This dataset can be used for anticipating emerging threats and potentials connected to glacial lakes and as a basis for further studies at suspected GLOF hazard hotspots.
 
 The related study is part of the [GLAMoR](https://hu.berlin/glamor) project (Future **G**lacial **L**akes in High Mountain **A**sia -
-**Mo**deling and **R**isk Analysis) situated at the Geography Department of Humboldt-Universität zu Berlin. 
+**Mo**deling and **R**isk Analysis) at the Geography Department of Humboldt-Universität zu Berlin. 
 
 ### Detailed information
 This dataset contains two shapefiles of subglacial overdeepenings in High Mountain Asia. 
