@@ -14,8 +14,3 @@ fun_regionGroup <- function(input){
 for (i in 1:length(input)){
   fun_regionGroup(input[i])
 }
-
-
-  
-  
-  

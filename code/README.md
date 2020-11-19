@@ -1,5 +1,7 @@
 ![GLAMoR](https://cryo-tools.org/wp-content/uploads/2020/07/GLAMoR-LOGO-400px.png)
 ## Scripts
+The scripts in this repository can be used to calculate subglacial overdeepenings.
+The main work is done by *calculations.py* safe for one routine that more reliably works in R. 
 
 ### Required data
 In order to run properly, the scripts in this repository require different datasets to be downloaded.
@@ -21,6 +23,8 @@ platform, folder structure, and data. However, they are very straightforward:
 - subtract the glacier ice thickness data from the DEM to get a DEM of the subglacial topography
 - clip the bedrock raster of each glacier using the RGI outlines
 - project to a suitable coordinate system (we used the Albers equal-area projection)
+
+The required folder structure is described in the python script.
 
 #### Citation
 You are free to use this code and the dataset in your research. 

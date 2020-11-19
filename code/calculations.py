@@ -242,7 +242,7 @@ for raster in os.listdir(input_path_raster):
 # Next, we need to region group all the overdeepenings in the bed of each glacier.
 # Normally, this should be possible with arcpy, but there are some still unresolved bugs in the region group routine.
 # Therefore, we recommend to stop this script temporarily and switch to R for the next step.
-# There, using the clump package will accomplish the same. 
+# There, using the clump package will accomplish the same.
 
 # Second Step: Calculate overdeepening properties
 glaciersToDo = [name for name in os.listdir(work_path)]
