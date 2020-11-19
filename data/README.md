@@ -3,7 +3,7 @@
 ### Detailed information
 This dataset contains two shapefiles of subglacial overdeepenings in High Mountain Asia. 
 1. *overdeepenings_HMA_large.shp*: A shapefile containing only overdeepenings with a surface area >10<sup>5</sup>  m<sup>2</sup>.
-1. *overdeepenings_HMA_complete.shp*: A shapefile containing all subglacial overdeepenings in High Mountain Asia with a surface area >10<sup>4</sup>  m<sup>2</sup>. 
+2. *overdeepenings_HMA_complete.shp*: A shapefile containing all subglacial overdeepenings in High Mountain Asia with a surface area >10<sup>4</sup>  m<sup>2</sup>. 
 
 Further information can be found in the METADATA.md file. 
 
