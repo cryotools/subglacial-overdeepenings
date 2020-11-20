@@ -53,8 +53,6 @@ for raster in os.listdir(input_path_raster):
         except OSError:
             print ("Creation of the directory %s failed" % subfolder_SHP)
 
-        #####################################################################################
-
         print "extracting single glacier-shp from RGI-shapes"
         where_clause = str(glacierID[0:8] + "." + glacierID[9:])
         arcpy.Select_analysis(RGI_path, current_path + "/glacier.shp",
@@ -240,7 +238,7 @@ for raster in os.listdir(input_path_raster):
         print("Number of unreachable objects collected by GC: ", n)
 
 # Next, we need to region group all the overdeepenings in the bed of each glacier.
-# Normally, this should be possible with arcpy, but there are some still unresolved bugs in the region group routine.
+# Normally, this should be possible with arcpy, but there are still unresolved bugs in the region group routine.
 # Therefore, we recommend to stop this script temporarily and switch to R for the next step.
 # There, using the clump package will accomplish the same.
 
@@ -372,7 +370,6 @@ for i in glaciersToDo:
                                    pyramid_level_resolution="0")
             print "== Completed =="
 
-
 ################################################################
 
         # create folder for current TIN and copying TINS
@@ -428,7 +425,6 @@ for i in glaciersToDo:
                 extract = ExtractByAttributes(current_path + "/area_sinksRegionInt.tif", ' "Value" = {}'.format(gridcode))
                 extract.save(subsubfolder_SINKS + "/sink.tif")
                 del extract
-
 
 ############################################################################################################
 
@@ -897,9 +893,7 @@ for i in glaciersToDo:
             # merge the different slope categories
             arcpy.Merge_management(matches, sinkfolder + "/merged_slopes/all_merged.shp")
 
-
 ############################################################################################
-
 
         # calculate hazard approximation mean
         for i in range(len(os.listdir(subfolder_SINKS))):
@@ -953,4 +947,4 @@ for i in glaciersToDo:
                     for row in cursor:
                         row[0] = 0
                         cursor.updateRow(row)
-
+                        
