@@ -38,4 +38,3 @@ Furian, Wilhelm (2020): An inventory of future glacial lakes in
 High Mountain Asia in shapefile format, v0.1, Zenodo, DOI: 10.5181/zenodo.3958786
 
 [![DOI](https://zenodo.org/badge/281966062.svg)](https://zenodo.org/badge/latestdoi/281966062)
-
