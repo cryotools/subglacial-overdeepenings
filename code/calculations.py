@@ -947,4 +947,3 @@ for i in glaciersToDo:
                     for row in cursor:
                         row[0] = 0
                         cursor.updateRow(row)
-                        

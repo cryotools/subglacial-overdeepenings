@@ -23,6 +23,13 @@ This study builds on several resources:
 - [RGI Consortium (2017): Randolph Glacier Inventory - A Dataset of Global Glacier Outlines: Version 6.0, Global Land Ice Measurements from Space Initiative.](https://doi.org/10.7265/N5-RGI-60)
 - [Takaku et al. (2018): Quality Improvements of ‘AW3D’ Global Dsm Derived from Alos Prism. In : Proc. IGARSS 2018](10.1109/IGARSS.2018.8518360)
 
+### Improving the dataset
+
+Please use the [Issues](https://github.com/cryotools/subglacial-overdeepenings/issues)
+section to report any errors. In order to share your own improvements to the 
+code or the shapefiles, please fork the repository, commit your changes, 
+and file a merge request.
+
 #### Citation
 You are free to use this dataset in your research. If you do, 
 please refer to the release you used, e.g., for v0.1:
