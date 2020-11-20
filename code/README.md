@@ -1,7 +1,11 @@
 ![GLAMoR](https://cryo-tools.org/wp-content/uploads/2020/07/GLAMoR-LOGO-400px.png)
 ## Scripts
 The scripts in this repository can be used to calculate subglacial overdeepenings.
-The main work is done by *calculations.py* safe for one routine that more reliably works in R. 
+The main work is done by *calculations.py*, which consists of two subsequent routines
+ for all glaciers. As the `region group` routine in ArcGIS is still buggy for
+ large datasets, we outsourced this step to R. Therefore, the routine needs to be stopped
+ and the results have to be run through the R script in order to provide the
+ necessary data for the second python routine.
 
 ### Required data
 In order to run properly, the scripts in this repository require different datasets to be downloaded.
