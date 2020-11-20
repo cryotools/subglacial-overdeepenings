@@ -19,14 +19,21 @@ Humboldt-Universität zu Berlin.
 
 ### Ressources
 This study builds on several resources:
-- [Farinotti et al. (2019): A consensus estimate for the ice thickness distribution of all glaciers on Earth, In Nat. Geosci. 12 (3), pp. 168–173. ](https://doi.org/10.1038/s41561-019-0300-3)
-- [RGI Consortium (2017): Randolph Glacier Inventory - A Dataset of Global Glacier Outlines: Version 6.0, Global Land Ice Measurements from Space Initiative.](https://doi.org/10.7265/N5-RGI-60)
-- [Takaku et al. (2018): Quality Improvements of ‘AW3D’ Global Dsm Derived from Alos Prism. In : Proc. IGARSS 2018](10.1109/IGARSS.2018.8518360)
+- [Farinotti et al. (2019): A consensus estimate for the 
+  ice thickness distribution of all glaciers on Earth, 
+  In Nat. Geosci. 12 (3), pp. 168–173. 
+  ](https://doi.org/10.1038/s41561-019-0300-3)
+- [RGI Consortium (2017): Randolph Glacier Inventory - 
+  A Dataset of Global Glacier Outlines: Version 6.0, 
+  Global Land Ice Measurements from Space Initiative.
+  ](https://doi.org/10.7265/N5-RGI-60)
+- [Takaku et al. (2018): Quality Improvements of ‘AW3D’ 
+  Global Dsm Derived from Alos Prism. In : Proc. IGARSS 
+  2018](10.1109/IGARSS.2018.8518360)
 
 ### Improving the dataset
-
 Please use the [Issues](https://github.com/cryotools/subglacial-overdeepenings/issues)
-section to report any errors. In order to share your own improvements to the 
+section to report any errors. If you would like to share your own improvements to the 
 code or the shapefiles, please fork the repository, commit your changes, 
 and file a merge request.
 

@@ -1,3 +1,41 @@
+"""
+    ###############################
+    ## Subglacial Overdeepenings ##
+    ###############################
+
+    This is the main code file of the first work package of the project 'Future glacial lakes
+    in High Mountain Asia - Modeling and Risk Analysis' (GLAMoR).
+    The script was written by Wilhelm Furian.
+
+    With this script it is possible to analyze the subglacial bedrock topography of
+    all glaciers in a given RGI region and to find potential future glacial lakes.
+    It also allows for the investigation of the morphology of surrounding mountain slopes
+    in order to quantify the potential hazard of mass movement impacts into the future lakes.
+
+    In order to run properly, this script requires different datasets to be downloaded:
+    - glacier ice thickness data in raster format. For High Mountain Asia (HMA),
+      we recommend the data provided by Farinotti et al. (2019)
+      (https://doi.org/10.1038/s41561-019-0300-3)
+    - glacier outlines in shapefile format, downloadable from the Randolph Glacier Inventory, v6
+      (https://www.glims.org/RGI/)
+    - a DEM raster for the whole study area. For HMA, we recommend using the ALOS World 3D - 30m (AW3D30),
+      available at https://www.eorc.jaxa.jp/ALOS/en/aw3d30/index.htm.
+
+    The model is written in Python 2.7 and has been tested with ArcGIS 10.7 and PyCharm CE 2019.3.1.
+    It needs the following ArcGIS extensions to be enabled:
+    3D Analyst, Spatial Analyst and Geostatistical Analyst.
+
+    The code is available on github. https://github.com/cryotools/subglacial-overdeepenings
+    For more information on this work package see the README.
+    For more information on the project as a whole see https://hu-berlin.de/glamor.
+
+    You are allowed to use and modify this code in a noncommercial manner and by
+    appropriately citing the above mentioned developer. If you would like to share your own improvements,
+    please fork the repository on GitHub, commit your changes, and file a merge request.
+
+    Correspondence: furiawil@geo.hu-berlin.de
+"""
+
 # imports
 import os
 import os.path
@@ -15,10 +53,10 @@ arcpy.env.overwriteOutput = True
 
 # prepare input paths
 # (at the moment, this has to be done manually for every RGI region)
-input_path = "~" # path to folder with all the preprocessed glacier thickness data
-input_path_raster = "~" # path to final glacier thickness data
-RGI_path = "~/14_rgi60_SouthAsiaWest.shp" # absolute path to the RGI shapefile of the current region
-work_path = "~" # where should the files be saved
+input_path = "~"                            # path to folder with all the preprocessed glacier thickness data
+input_path_raster = "~"                     # path to final glacier thickness data
+RGI_path = "~/14_rgi60_SouthAsiaWest.shp"   # absolute path to the RGI shapefile of the current region
+work_path = "~"                             # where should the files be saved
 
 # First Step: Find overdeepenings
 for raster in os.listdir(input_path_raster):
@@ -46,12 +84,12 @@ for raster in os.listdir(input_path_raster):
         try:
             os.mkdir(current_path)
         except OSError:
-            print ("Creation of the directory %s failed" % current_path)
+            print("Creation of the directory %s failed" % current_path)
 
         try:
             os.mkdir(subfolder_SHP)
         except OSError:
-            print ("Creation of the directory %s failed" % subfolder_SHP)
+            print("Creation of the directory %s failed" % subfolder_SHP)
 
         print "extracting single glacier-shp from RGI-shapes"
         where_clause = str(glacierID[0:8] + "." + glacierID[9:])
@@ -82,7 +120,7 @@ for raster in os.listdir(input_path_raster):
         try:
             os.mkdir(subfolder_RGI)
         except OSError:
-            print ("Creation of the directory %s failed" % subfolder_RGI)
+            print("Creation of the directory %s failed" % subfolder_RGI)
 
         with arcpy.da.SearchCursor(current_path + "/intersect.shp", "RGIId") as cursor:
             for row in cursor:
@@ -133,7 +171,7 @@ for raster in os.listdir(input_path_raster):
         try:
             os.mkdir(subfolder_TIF)
         except OSError:
-            print ("Creation of the directory %s failed" % subfolder_TIF)
+            print("Creation of the directory %s failed" % subfolder_TIF)
 
         print "copy intersecting tifs and glacier bedrock tifs into subfolder_TIF"
         for filename in os.listdir(subfolder_RGI):
@@ -142,7 +180,8 @@ for raster in os.listdir(input_path_raster):
                 for tif in os.listdir(input_path + "/03_substracted"):
                     if str(tif)[6:14] == RGI_nr:
                         arcpy.CopyRaster_management(in_raster=input_path + "/03_substracted/" + tif,
-                                                    out_rasterdataset=subfolder_TIF + "/" + str(tif)[6:8] + "_" + str(tif)[9:14] + str(tif)[24:28])
+                                                    out_rasterdataset=subfolder_TIF + "/" + str(tif)[6:8] + "_" + str(
+                                                        tif)[9:14] + str(tif)[24:28])
 
         print "project main area DEM raster"
         arcpy.ProjectRaster_management(in_raster=current_path + "/DEM_area.tif",
@@ -156,13 +195,13 @@ for raster in os.listdir(input_path_raster):
         try:
             os.mkdir(subfolder_TIF_projected)
         except OSError:
-            print ("Creation of the directory %s failed" % subfolder_TIF_projected)
+            print("Creation of the directory %s failed" % subfolder_TIF_projected)
 
         print "project all intersecting rasters and main glacier raster"
         for filename in os.listdir(subfolder_TIF):
             if filename.endswith(".tif"):
-                if os.path.isfile(subfolder_TIF_projected+"/"+filename):
-                    print ("File exists")
+                if os.path.isfile(subfolder_TIF_projected + "/" + filename):
+                    print("File exists")
                 else:
                     print "Projecting " + filename
                     arcpy.ProjectRaster_management(in_raster=subfolder_TIF + "/" + filename,
@@ -237,10 +276,12 @@ for raster in os.listdir(input_path_raster):
         n = gc.collect()
         print("Number of unreachable objects collected by GC: ", n)
 
-# Next, we need to region group all the overdeepenings in the bed of each glacier.
-# Normally, this should be possible with arcpy, but there are still unresolved bugs in the region group routine.
-# Therefore, we recommend to stop this script temporarily and switch to R for the next step.
-# There, using the clump package will accomplish the same.
+"""
+Next, we need to region group all the overdeepenings in the bed of each glacier.
+Normally, this should be possible with arcpy, but there are still unresolved bugs in the region group routine.
+Therefore, we recommend to stop this script temporarily and switch to R for the next step.
+There, using the clump package will accomplish the same.
+"""
 
 # Second Step: Calculate overdeepening properties
 glaciersToDo = [name for name in os.listdir(work_path)]
@@ -249,8 +290,17 @@ for i in glaciersToDo:
         glacierID = i
         glacierLocation = input_path + "/01_original/" + glacierID[:8] + "." + glacierID[9:] + "_thickness.tif"
 
+        # define several work folder connections
+        current_path = work_path + "/" + glacierID
+        subfolder_SHP = current_path + "/" + "single_sink_shapes"
+        subfolder_RGI = current_path + "/single_RGI_shapes"
+        subfolder_TIN = current_path + "/" + "single_TINs"
+        subfolder_TIF = current_path + "/intersecting_TIFs"
+        subfolder_TIF_projected = work_path + "/intersecting_TIFs_projected"
+        subfolder_SINKS = current_path + "/single_sinks"
+
         print "convert to Int-raster and calculate attribute table for R-import"
-        outInt = Int(current_path + "/area_sinksRegion.tif") # this is the file produced by R
+        outInt = Int(current_path + "/area_sinksRegion.tif")  # this is the file produced by R
         outInt.save(current_path + "/area_sinksRegionInt.tif")
         del outInt
         arcpy.BuildRasterAttributeTable_management(in_raster=current_path + "/area_sinksRegionInt.tif",
@@ -330,7 +380,7 @@ for i in glaciersToDo:
                 print "deleted everything save the LOCK-file"
                 print "manual check required at " + current_path
             output = "Glacier folder " + glacierID + " was deleted."
-            file = open(work_path + "/glacier_"+ glacierID + "_was_deleted.txt", "a")
+            file = open(work_path + "/glacier_" + glacierID + "_was_deleted.txt", "a")
             file.write(output)
             file.close()
             continue
@@ -363,14 +413,13 @@ for i in glaciersToDo:
             print "== Calculating separate TIN volume and area =="
             arcpy.PolygonVolume_3d(in_surface=TINs,
                                    in_feature_class=polygonGrp,
-                                   in_height_field="MAX", # TODO: eventuell MAX-10, dafuer vorher ein neues height-field berechnen
-                                   reference_plane="BELOW",
+                                   in_height_field="MAX",
                                    out_volume_field="Volume",
                                    surface_area_field="SArea",
                                    pyramid_level_resolution="0")
             print "== Completed =="
 
-################################################################
+        ################################################################
 
         # create folder for current TIN and copying TINS
         try:
@@ -407,7 +456,7 @@ for i in glaciersToDo:
         try:
             os.mkdir(subfolder_SINKS)
         except OSError:
-            print ("Creation of the directory %s failed" % subfolder_SINKS)
+            print("Creation of the directory %s failed" % subfolder_SINKS)
 
         print "copy sink shapefile into new sink folder and create sink-raster"
         for sinkshape in os.listdir(subfolder_SHP):
@@ -422,13 +471,14 @@ for i in glaciersToDo:
                 with arcpy.da.SearchCursor(subsubfolder_SINKS + "/sink.shp", "gridcode") as cursor:
                     for row in cursor:
                         gridcode = row[0]
-                extract = ExtractByAttributes(current_path + "/area_sinksRegionInt.tif", ' "Value" = {}'.format(gridcode))
+                extract = ExtractByAttributes(current_path + "/area_sinksRegionInt.tif",
+                                              ' "Value" = {}'.format(gridcode))
                 extract.save(subsubfolder_SINKS + "/sink.tif")
                 del extract
 
-############################################################################################################
+        ############################################################################################################
 
-# Step Three: Find relevant slopes for each overdeepening
+        # Step Three: Find relevant slopes for each overdeepening
 
         print "calculate relevant slopes for every sink"
         for i in range(len(os.listdir(subfolder_SINKS))):
@@ -512,13 +562,16 @@ for i in glaciersToDo:
                                                       out_feature_class=sinkfolder + "/inletPoint{}.shp".format(
                                                           str(FID)),
                                                       where_clause=' "FID" = {}'.format(str(FID)))
-                                ExtractValuesToPoints(in_point_features=sinkfolder + "/inletPoint{}.shp".format(str(FID)),
+                                ExtractValuesToPoints(in_point_features=sinkfolder + "/inletPoint{}.shp".
+                                                      format(str(FID)),
                                                       in_raster=current_path + "/area_flowAcc.tif",
-                                                      out_point_features=sinkfolder + "/inletPoint{}_VAL.shp".format(str(FID)))
+                                                      out_point_features=sinkfolder + "/inletPoint{}_VAL.shp".
+                                                      format(str(FID)))
 
                                 # calculate watershed
                                 outWatershed = Watershed(in_flow_direction_raster=current_path + "/area_flowDir.tif",
-                                                         in_pour_point_data=sinkfolder + "/inletPoint{}_VAL.shp".format(str(FID)))
+                                                         in_pour_point_data=sinkfolder + "/inletPoint{}_VAL.shp".format(
+                                                             str(FID)))
                                 outWatershed.save(sinkfolder + "/watershed{}.tif".format(str(FID)))
                                 del outWatershed
 
@@ -580,7 +633,7 @@ for i in glaciersToDo:
                                                          simplify="NO_SIMPLIFY",
                                                          create_multipart_features="MULTIPLE_OUTER_PART")
 
-#############################################################################################
+        #############################################################################################
 
         print "calculate slope raster for watershed area"
         for i in range(len(os.listdir(subfolder_SINKS))):
@@ -598,18 +651,20 @@ for i in glaciersToDo:
             slopes = Raster(sinkfolder + "/slope.tif")
             if slopes.maximum < threshold_low:
                 print "###############################################"
-                print "Sink " + str(sinkNr) + " has no slopes between " + str(threshold_low) + " and " + str(threshold_high) + " degrees!"
+                print "Sink " + str(sinkNr) + " has no slopes between " + str(threshold_low) + " and " + str(
+                    threshold_high) + " degrees!"
                 print "###############################################"
                 return
             elif slopes.maximum >= threshold_low:
-                print "Sink " + str(sinkNr) + " has some contributing slope areas between " + str(threshold_low) + " and " + str(threshold_high)
+                print "Sink " + str(sinkNr) + " has some contributing slope areas between " + str(
+                    threshold_low) + " and " + str(threshold_high)
 
             # create new subsubfolder for the slope class
             try:
                 subfolder_SLOPES = sinkfolder + "/slopes" + str(threshold_low)
                 os.mkdir(subfolder_SLOPES)
             except OSError:
-                print ("Creation of the directory %s failed" % subfolder_SLOPES)
+                print("Creation of the directory %s failed" % subfolder_SLOPES)
 
             # generate 0-1-raster for all critical slopes
             slopes = Con(sinkfolder + "/slope.tif", 1, 0,
@@ -636,7 +691,8 @@ for i in glaciersToDo:
             rows = [row for row in arcpy.da.SearchCursor(subfolder_SLOPES + "/slopes.shp", field_names="*")]
             if len(rows) == 0:
                 print "###############################################"
-                print "Sink " + str(sinkNr) + " has no remaining slopes between " + str(threshold_low) + " and " + str(threshold_high) + " degrees!"
+                print "Sink " + str(sinkNr) + " has no remaining slopes between " + str(threshold_low) + " and " + str(
+                    threshold_high) + " degrees!"
                 print "###############################################"
                 return
 
@@ -799,7 +855,7 @@ for i in glaciersToDo:
                             # slope
                             arcpy.AddField_management(os.path.join(subdir, filename),
                                                       field_name="HZRD_SLOPE", field_type="FLOAT")
-                            expression = "(!MEAN_1! - 20) / (70 - 20)" # TODO: 20 durch 30 ersetzen, wenn man den threshold fuers Minimum aendern will
+                            expression = "(!MEAN_1! - 20) / (70 - 20)"
                             arcpy.CalculateField_management(in_table=os.path.join(subdir, filename),
                                                             field="HZRD_SLOPE",
                                                             expression=expression,
@@ -864,7 +920,8 @@ for i in glaciersToDo:
                                        SLOPES_MERGED + "/sink{}_merged_{}_to_{}.shp".format(sinkNr, threshold_low,
                                                                                             threshold_high))
 
-# Step Four: Calculate hazards for all slopes
+
+        # Step Four: Calculate hazards for all slopes
         # detect all slopes
         for i in range(len(os.listdir(subfolder_SINKS))):
             single_slope_calc(sinkNr=i, threshold_low=60, threshold_high=90)
@@ -893,7 +950,7 @@ for i in glaciersToDo:
             # merge the different slope categories
             arcpy.Merge_management(matches, sinkfolder + "/merged_slopes/all_merged.shp")
 
-############################################################################################
+        ############################################################################################
 
         # calculate hazard approximation mean
         for i in range(len(os.listdir(subfolder_SINKS))):
@@ -921,15 +978,16 @@ for i in glaciersToDo:
                             row[0] = 1
                             cursor.updateRow(row)
 
-            # calculate maximum hazard
-                hazards = [i[0] for i in arcpy.da.SearchCursor(sinkfolder + "/merged_slopes/all_merged.shp", "HAZARD_NEW")]
+                # calculate maximum hazard
+                hazards = [i[0] for i in
+                           arcpy.da.SearchCursor(sinkfolder + "/merged_slopes/all_merged.shp", "HAZARD_NEW")]
                 max_hazard = max(hazards)
                 with arcpy.da.UpdateCursor(sinkfolder + "/sink.shp", "HAZARD_MAX") as cursor:
                     for row in cursor:
                         row[0] = max_hazard
                         cursor.updateRow(row)
 
-            # calculate lake impact predisposition area
+                # calculate lake impact predisposition area
                 with arcpy.da.SearchCursor(sinkfolder + "/merged_slopes/all_merged.shp", "DEM_AREA") as cursor:
                     for row in cursor:
                         impact_area = impact_area + row[0]
