@@ -54,7 +54,7 @@ arcpy.env.overwriteOutput = True
 # prepare input paths
 # (at the moment, this has to be done manually for every RGI region)
 input_path = "~"                            # path to folder with all the preprocessed glacier thickness data
-input_path_raster = "~"                     # path to final glacier thickness data
+input_path_raster = "~"                     # path to final glacier thickness rasters
 RGI_path = "~/14_rgi60_SouthAsiaWest.shp"   # absolute path to the RGI shapefile of the current region
 work_path = "~"                             # where should the files be saved
 
@@ -158,7 +158,7 @@ for raster in os.listdir(input_path_raster):
         arcpy.Dissolve_management(in_features=subfolder_RGI + "/merged_buffer.shp",
                                   out_feature_class=subfolder_RGI + "/dissolved_buffer.shp")
 
-        # loading ALOS clipped to buffer extend
+        # loading ALOS clipped to buffer extent
         print "Clipping"
         arcpy.Clip_management(in_raster="D:/03_HMA_DEM/HMA_alos-jaxa.tif",
                               out_raster=current_path + "/DEM_area.tif",
@@ -324,9 +324,9 @@ for i in glaciersToDo:
             del polygonGrp
             shutil.rmtree(current_path)
             output = "Glacier folder " + glacierID + " was deleted."
-            file = open(work_path + "/glacier_" + glacierID + "_was_deleted.txt", "a")
-            file.write(output)
-            file.close()
+            text = open(work_path + "/glacier_" + glacierID + "_was_deleted.txt", "a")
+            text.write(output)
+            text.close()
             continue
 
         print "== Creating and saving zonal statistics =="
@@ -380,9 +380,9 @@ for i in glaciersToDo:
                 print "deleted everything save the LOCK-file"
                 print "manual check required at " + current_path
             output = "Glacier folder " + glacierID + " was deleted."
-            file = open(work_path + "/glacier_" + glacierID + "_was_deleted.txt", "a")
-            file.write(output)
-            file.close()
+            text = open(work_path + "/glacier_" + glacierID + "_was_deleted.txt", "a")
+            text.write(output)
+            text.close()
             continue
         elif len(rows) >= 1:
             print "== Found " + str(rows) + " remaining sinks =="
@@ -421,21 +421,21 @@ for i in glaciersToDo:
 
         ################################################################
 
-        # create folder for current TIN and copying TINS
+        # create folder for current TIN and copy TINS
         try:
             os.mkdir(subfolder_TIN)
         except OSError:
-            print ("Creation of the directory %s failed" % subfolder_TIN)
+            print("Creation of the directory %s failed" % subfolder_TIN)
 
         print "editing single TINs with each row of the shp"
         print "and copying the respective shp-files into subfolder_SHP"
         rows = [row for row in arcpy.da.SearchCursor(current_path + "/polygonGrp.shp", field_names="*")]
-        for i in range(len(rows)):
+        for j in range(len(rows)):
+            subsubfolder_TIN = subfolder_TIN + "/" + "TIN_" + str(j)
             try:
-                subsubfolder_TIN = subfolder_TIN + "/" + "TIN_" + str(i)
                 os.mkdir(subsubfolder_TIN)
             except OSError:
-                print ("Creation of the directory %s failed" % subsubfolder_TIN)
+                print("Creation of the directory %s failed" % subsubfolder_TIN)
             # copy the whole TIN-set in the subfolder:
             arcpy.CopyTin_3d(in_tin=current_path + "/TINs", out_tin=subsubfolder_TIN)
             # create copy of "polygonGrp" to edit the TIN-set into the single TINs:
@@ -443,7 +443,7 @@ for i in glaciersToDo:
             # delete everything save the current row
             with arcpy.da.UpdateCursor(current_path + "/sinks.shp", "FID") as cursor:
                 for row in cursor:
-                    if row[0] > i or row[0] < i:
+                    if row[0] > j or row[0] < j:
                         cursor.deleteRow()
             # copy the remaining shp into the subfolder for the sink-shapes
             arcpy.CopyFeatures_management(current_path + "/sinks.shp", subfolder_SHP + "/sinks" + str(i) + ".shp")
@@ -462,11 +462,11 @@ for i in glaciersToDo:
         for sinkshape in os.listdir(subfolder_SHP):
             if sinkshape.endswith(".shp"):
                 sinkNr = re.findall(r'\d+', sinkshape)[0]
+                subsubfolder_SINKS = subfolder_SINKS + "/sink" + str(sinkNr)
                 try:
-                    subsubfolder_SINKS = subfolder_SINKS + "/sink" + str(sinkNr)
                     os.mkdir(subsubfolder_SINKS)
                 except OSError:
-                    print ("Creation of the directory %s failed" % subsubfolder_SINKS)
+                    print("Creation of the directory %s failed" % subsubfolder_SINKS)
                 arcpy.CopyFeatures_management(subfolder_SHP + "/" + sinkshape, subsubfolder_SINKS + "/sink.shp")
                 with arcpy.da.SearchCursor(subsubfolder_SINKS + "/sink.shp", "gridcode") as cursor:
                     for row in cursor:
@@ -481,8 +481,8 @@ for i in glaciersToDo:
         # Step Three: Find relevant slopes for each overdeepening
 
         print "calculate relevant slopes for every sink"
-        for i in range(len(os.listdir(subfolder_SINKS))):
-            sinkNr = i
+        for j in range(len(os.listdir(subfolder_SINKS))):
+            sinkNr = j
             sinkfolder = subfolder_SINKS + "/sink" + str(sinkNr)
             for lakeraster in os.listdir(sinkfolder):
                 if lakeraster.startswith("sink") and lakeraster.endswith("tif"):
@@ -636,301 +636,301 @@ for i in glaciersToDo:
         #############################################################################################
 
         print "calculate slope raster for watershed area"
-        for i in range(len(os.listdir(subfolder_SINKS))):
-            sinkNr = i
-            sinkfolder = subfolder_SINKS + "/sink" + str(sinkNr)
+        for j in range(len(os.listdir(subfolder_SINKS))):
+            sinkNr = j
+            sink_path = subfolder_SINKS + "/sink" + str(sinkNr)
             arcpy.Clip_management(in_raster=current_path + "/area_slope.tif",
-                                  out_raster=sinkfolder + "/slope.tif",
-                                  in_template_dataset=sinkfolder + "/watershed_final.shp",
+                                  out_raster=sink_path + "/slope.tif",
+                                  in_template_dataset=sink_path + "/watershed_final.shp",
                                   clipping_geometry="ClippingGeometry")
 
         # define function for slope detection
-        def single_slope_calc(sinkNr, threshold_low, threshold_high):
-            sinkfolder = subfolder_SINKS + "/sink" + str(sinkNr)
+        def single_slope_calc(sinknr, threshold_low, threshold_high):
+            sink_folder = subfolder_SINKS + "/sink" + str(sinknr)
             # check for areas within threshold
-            slopes = Raster(sinkfolder + "/slope.tif")
+            slopes = Raster(sink_folder + "/slope.tif")
             if slopes.maximum < threshold_low:
                 print "###############################################"
-                print "Sink " + str(sinkNr) + " has no slopes between " + str(threshold_low) + " and " + str(
+                print "Sink " + str(sinknr) + " has no slopes between " + str(threshold_low) + " and " + str(
                     threshold_high) + " degrees!"
                 print "###############################################"
                 return
             elif slopes.maximum >= threshold_low:
-                print "Sink " + str(sinkNr) + " has some contributing slope areas between " + str(
+                print "Sink " + str(sinknr) + " has some contributing slope areas between " + str(
                     threshold_low) + " and " + str(threshold_high)
 
             # create new subsubfolder for the slope class
+            subfolder_slopes = sink_folder + "/slopes" + str(threshold_low)
             try:
-                subfolder_SLOPES = sinkfolder + "/slopes" + str(threshold_low)
-                os.mkdir(subfolder_SLOPES)
+                os.mkdir(subfolder_slopes)
             except OSError:
-                print("Creation of the directory %s failed" % subfolder_SLOPES)
+                print("Creation of the directory %s failed" % subfolder_slopes)
 
             # generate 0-1-raster for all critical slopes
-            slopes = Con(sinkfolder + "/slope.tif", 1, 0,
+            slopes = Con(sink_folder + "/slope.tif", 1, 0,
                          "VALUE >= {} AND VALUE < {}".format(threshold_low, threshold_high))
-            slopes.save(subfolder_SLOPES + "/slopes_prelim.tif")
+            slopes.save(subfolder_slopes + "/slopes_prelim.tif")
 
             # exclude the lake area from the binary slope raster
-            slopesBinary = Con(IsNull(sinkfolder + "/sink.tif"), subfolder_SLOPES + "/slopes_prelim.tif")
-            slopesBinary.save(subfolder_SLOPES + "/slopes_binary.tif")
+            slopes_binary = Con(IsNull(sink_folder + "/sink.tif"), subfolder_slopes + "/slopes_prelim.tif")
+            slopes_binary.save(subfolder_slopes + "/slopes_binary.tif")
             del slopes
-            del slopesBinary
+            del slopes_binary
 
             # generate polygon shapefile for slopes
-            arcpy.RasterToPolygon_conversion(in_raster=subfolder_SLOPES + "/slopes_binary.tif",
-                                             out_polygon_features=subfolder_SLOPES + "/slopes.shp",
+            arcpy.RasterToPolygon_conversion(in_raster=subfolder_slopes + "/slopes_binary.tif",
+                                             out_polygon_features=subfolder_slopes + "/slopes.shp",
                                              simplify="NO_SIMPLIFY",
                                              create_multipart_features="MULTIPLE_OUTER_PART")
-            with arcpy.da.UpdateCursor(subfolder_SLOPES + "/slopes.shp", ["gridcode"]) as cursor:
-                for row in cursor:
-                    if row[0] == 0:
-                        cursor.deleteRow()
+            with arcpy.da.UpdateCursor(subfolder_slopes + "/slopes.shp", ["gridcode"]) as crsr:
+                for rw in crsr:
+                    if rw[0] == 0:
+                        crsr.deleteRow()
 
             # new check to see if deleting the lake area also deleted all the relevant slopes
-            rows = [row for row in arcpy.da.SearchCursor(subfolder_SLOPES + "/slopes.shp", field_names="*")]
-            if len(rows) == 0:
+            rws = [rw for rw in arcpy.da.SearchCursor(subfolder_slopes + "/slopes.shp", field_names="*")]
+            if len(rws) == 0:
                 print "###############################################"
-                print "Sink " + str(sinkNr) + " has no remaining slopes between " + str(threshold_low) + " and " + str(
+                print "Sink " + str(sinknr) + " has no remaining slopes between " + str(threshold_low) + " and " + str(
                     threshold_high) + " degrees!"
                 print "###############################################"
                 return
 
             # get slope and (rounded) elevation values for critical slopes
             arcpy.Clip_management(in_raster=current_path + "/area_slope.tif",
-                                  out_raster=subfolder_SLOPES + "/slope_clip.tif",
-                                  in_template_dataset=subfolder_SLOPES + "/slopes.shp",
+                                  out_raster=subfolder_slopes + "/slope_clip.tif",
+                                  in_template_dataset=subfolder_slopes + "/slopes.shp",
                                   clipping_geometry="ClippingGeometry")
             arcpy.Clip_management(in_raster=current_path + "/area_bedrock.tif",
-                                  out_raster=subfolder_SLOPES + "/elevation_clipFL.tif",
-                                  in_template_dataset=subfolder_SLOPES + "/slopes.shp",
+                                  out_raster=subfolder_slopes + "/elevation_clipFL.tif",
+                                  in_template_dataset=subfolder_slopes + "/slopes.shp",
                                   clipping_geometry="ClippingGeometry")
-            outInt = Int(subfolder_SLOPES + "/elevation_clipFL.tif")
-            outInt.save(subfolder_SLOPES + "/elevation_clipINT.tif")
-            del outInt
+            out_int = Int(subfolder_slopes + "/elevation_clipFL.tif")
+            out_int.save(subfolder_slopes + "/elevation_clipINT.tif")
+            del out_int
 
             # find single slope areas
             # create single-pixel polygon from integer elevation raster
-            arcpy.RasterToPolygon_conversion(in_raster=subfolder_SLOPES + "/elevation_clipINT.tif",
-                                             out_polygon_features=subfolder_SLOPES + "/slope_poly.shp",
+            arcpy.RasterToPolygon_conversion(in_raster=subfolder_slopes + "/elevation_clipINT.tif",
+                                             out_polygon_features=subfolder_slopes + "/slope_poly.shp",
                                              simplify="NO_SIMPLIFY",
                                              create_multipart_features="SINGLE_OUTER_PART")
             # dissolve into single slope areas
-            arcpy.Dissolve_management(in_features=subfolder_SLOPES + "/slope_poly.shp",
-                                      out_feature_class=subfolder_SLOPES + "/slope_dissolved.shp",
+            arcpy.Dissolve_management(in_features=subfolder_slopes + "/slope_poly.shp",
+                                      out_feature_class=subfolder_slopes + "/slope_dissolved.shp",
                                       multi_part="SINGLE_PART")
             # delete small slope areas
-            arcpy.AddGeometryAttributes_management(Input_Features=subfolder_SLOPES + "/slope_dissolved.shp",
+            arcpy.AddGeometryAttributes_management(Input_Features=subfolder_slopes + "/slope_dissolved.shp",
                                                    Geometry_Properties="AREA",
                                                    Area_Unit="SQUARE_METERS")
             row_list = []
-            with arcpy.da.UpdateCursor(subfolder_SLOPES + "/slope_dissolved.shp", "POLY_AREA") as cursor:
-                for row in cursor:
-                    if row[0] < 5000:
-                        cursor.deleteRow()
-                    elif row[0] >= 5000:
-                        row_list.append(row)
+            with arcpy.da.UpdateCursor(subfolder_slopes + "/slope_dissolved.shp", "POLY_AREA") as crsr:
+                for rw in crsr:
+                    if rw[0] < 5000:
+                        crsr.deleteRow()
+                    elif rw[0] >= 5000:
+                        row_list.append(rw)
 
             if len(row_list) == 0:
                 print "###############################################"
-                print "Sink " + str(sinkNr) + " has only very small slopes between " + str(
+                print "Sink " + str(sinknr) + " has only very small slopes between " + str(
                     threshold_low) + " and " + str(threshold_high) + " degrees!"
                 print "###############################################"
                 # return
             elif len(row_list) > 0:
-                print "Sink " + str(sinkNr) + " has " + str(len(row_list)) + " contributing slope areas."
+                print "Sink " + str(sinknr) + " has " + str(len(row_list)) + " contributing slope areas."
 
             # split slopes shapefile into a separate file for every slope
+            single_slopes = subfolder_slopes + "/single_slopes"
             try:
-                SINGLE_SLOPES = subfolder_SLOPES + "/single_slopes"
-                os.mkdir(SINGLE_SLOPES)
+                os.mkdir(single_slopes)
             except OSError:
-                print ("Creation of the directory %s failed" % SINGLE_SLOPES)
+                print("Creation of the directory %s failed" % single_slopes)
 
-            with arcpy.da.SearchCursor(subfolder_SLOPES + "/slope_dissolved.shp", ["FID"]) as cursor:
-                for row in cursor:
+            with arcpy.da.SearchCursor(subfolder_slopes + "/slope_dissolved.shp", ["FID"]) as crsr:
+                for rw in crsr:
                     try:
-                        SLOPE_NR = SINGLE_SLOPES + "/" + "slope" + str(row[0])
-                        os.mkdir(SLOPE_NR)
+                        slope_nr = single_slopes + "/" + "slope" + str(rw[0])
+                        os.mkdir(slope_nr)
                     except OSError:
-                        print ("Creation of the directory %s failed" % SLOPE_NR)
-                    arcpy.Select_analysis(in_features=subfolder_SLOPES + "/slope_dissolved.shp",
-                                          out_feature_class=SLOPE_NR + "/slope" + str(row[0]),
-                                          where_clause="""{0} = {1}""".format("FID", int(row[0])))
+                        print("Creation of the directory %s failed" % slope_nr)
+                    arcpy.Select_analysis(in_features=subfolder_slopes + "/slope_dissolved.shp",
+                                          out_feature_class=slope_nr + "/slope" + str(rw[0]),
+                                          where_clause="""{0} = {1}""".format("FID", int(rw[0])))
 
             # iterate through all the slopes for each sink and calculate everything:
             # the rounded distance to sink, mean elevation and mean slope
             # and merge all the shapefiles
-            for i in range(len(os.listdir(SINGLE_SLOPES))):
-                slopeNr = i
-                slopefolder = SINGLE_SLOPES + "/slope" + str(slopeNr)
+            for k in range(len(os.listdir(single_slopes))):
+                slopenr = k
+                slopefolder = single_slopes + "/slope" + str(slopenr)
                 for subdir, dirs, files in os.walk(slopefolder):
-                    for filename in files:
-                        if filename.endswith(".shp"):
+                    for file_name in files:
+                        if file_name.endswith(".shp"):
 
                             # calculate and round distance
-                            arcpy.Near_analysis(in_features=os.path.join(subdir, filename),
-                                                near_features=sinkfolder + "/sink.shp")
-                            with arcpy.da.UpdateCursor(os.path.join(subdir, filename), ["NEAR_DIST"]) as cursor:
-                                for row in cursor:
-                                    row[0] = round(row[0], 0)
-                                    cursor.updateRow(row)
+                            arcpy.Near_analysis(in_features=os.path.join(subdir, file_name),
+                                                near_features=sink_folder + "/sink.shp")
+                            with arcpy.da.UpdateCursor(os.path.join(subdir, file_name), ["NEAR_DIST"]) as crsr:
+                                for rw in crsr:
+                                    rw[0] = round(rw[0], 0)
+                                    cursor.updateRow(rw)
 
                             # clip bedrock raster to slope extent
                             arcpy.Clip_management(in_raster=current_path + "/area_bedrock.tif",
                                                   out_raster=subdir + "/DEM_slope.tif",
-                                                  in_template_dataset=os.path.join(subdir, filename),
+                                                  in_template_dataset=os.path.join(subdir, file_name),
                                                   clipping_geometry="ClippingGeometry")
 
                             # calculate MEAN elevation for slope
-                            zonStatOutput = subdir + "/slopeStats.dbf"
-                            ZonalStatisticsAsTable(in_zone_data=os.path.join(subdir, filename),
+                            zonstat_output = subdir + "/slopeStats.dbf"
+                            ZonalStatisticsAsTable(in_zone_data=os.path.join(subdir, file_name),
                                                    zone_field="NEAR_FID",
                                                    in_value_raster=subdir + "/DEM_slope.tif",
-                                                   out_table=zonStatOutput,
+                                                   out_table=zonstat_output,
                                                    statistics_type="ALL",
                                                    ignore_nodata=True)
 
                             # join results with slope polygon
-                            arcpy.JoinField_management(in_data=os.path.join(subdir, filename),
+                            arcpy.JoinField_management(in_data=os.path.join(subdir, file_name),
                                                        in_field="NEAR_FID",
-                                                       join_table=zonStatOutput,
+                                                       join_table=zonstat_output,
                                                        join_field="NEAR_FID",
                                                        fields=["MIN", "MAX", "MEAN"])
 
                             # clip slope raster to slope extent
                             arcpy.Clip_management(in_raster=current_path + "/area_slope.tif",
                                                   out_raster=subdir + "/slope_Abhang.tif",
-                                                  in_template_dataset=os.path.join(subdir, filename),
+                                                  in_template_dataset=os.path.join(subdir, file_name),
                                                   clipping_geometry="ClippingGeometry")
 
                             # calculate MEAN elevation for slope
-                            zonStatOutput = subdir + "/slopeStats_Abhang.dbf"
-                            ZonalStatisticsAsTable(in_zone_data=os.path.join(subdir, filename),
+                            zonstat_output = subdir + "/slopeStats_Abhang.dbf"
+                            ZonalStatisticsAsTable(in_zone_data=os.path.join(subdir, file_name),
                                                    zone_field="NEAR_FID",
                                                    in_value_raster=subdir + "/slope_Abhang.tif",
-                                                   out_table=zonStatOutput,
+                                                   out_table=zonstat_output,
                                                    statistics_type="ALL",
                                                    ignore_nodata=True)
 
                             # join results with slope polygon
-                            arcpy.JoinField_management(in_data=os.path.join(subdir, filename),
+                            arcpy.JoinField_management(in_data=os.path.join(subdir, file_name),
                                                        in_field="NEAR_FID",
-                                                       join_table=zonStatOutput,
+                                                       join_table=zonstat_output,
                                                        join_field="NEAR_FID",
                                                        fields=["MIN", "MAX", "MEAN"])
 
                             # calculate area estimate regarding different possibilities of sloping terrain
-                            arcpy.AddField_management(os.path.join(subdir, filename), field_name="DEM_AREA")
+                            arcpy.AddField_management(os.path.join(subdir, file_name), field_name="DEM_AREA")
                             expression = "((32*(math.sqrt(((math.tan(math.radians(!MEAN_1!))*32)**2)+32**2)) + " \
                                          "((math.tan(math.radians(!MEAN_1!))*32)**2)+32**2) / 2) * (!POLY_AREA!/1024)"
-                            arcpy.CalculateField_management(in_table=os.path.join(subdir, filename),
+                            arcpy.CalculateField_management(in_table=os.path.join(subdir, file_name),
                                                             field="DEM_AREA",
                                                             expression=expression,
                                                             expression_type="PYTHON_9.3")
 
                             # add height and area fields to each slope
-                            lakeTable = sinkfolder + "/sink.shp"
-                            arcpy.JoinField_management(in_data=os.path.join(subdir, filename),
+                            lake_table = sink_folder + "/sink.shp"
+                            arcpy.JoinField_management(in_data=os.path.join(subdir, file_name),
                                                        in_field="FID",
-                                                       join_table=lakeTable,
+                                                       join_table=lake_table,
                                                        join_field="FID",
                                                        fields=["MAX_round", "AREA"])
 
                             # Calculate the hazard scores:
                             # height difference
-                            arcpy.AddField_management(os.path.join(subdir, filename),
+                            arcpy.AddField_management(os.path.join(subdir, file_name),
                                                       field_name="HZRD_HGHT", field_type="FLOAT")
                             expression = "(!MAX! - !MAX_round!) / 1000"
-                            arcpy.CalculateField_management(in_table=os.path.join(subdir, filename),
+                            arcpy.CalculateField_management(in_table=os.path.join(subdir, file_name),
                                                             field="HZRD_HGHT",
                                                             expression=expression,
                                                             expression_type="PYTHON_9.3")
-                            with arcpy.da.UpdateCursor(os.path.join(subdir, filename), ["HZRD_HGHT"]) as cursor:
-                                for row in cursor:
-                                    if row[0] > 1:
-                                        row[0] = 1
-                                        cursor.updateRow(row)
+                            with arcpy.da.UpdateCursor(os.path.join(subdir, file_name), ["HZRD_HGHT"]) as crsr:
+                                for rw in crsr:
+                                    if rw[0] > 1:
+                                        rw[0] = 1
+                                        crsr.updateRow(rw)
 
                             # slope
-                            arcpy.AddField_management(os.path.join(subdir, filename),
+                            arcpy.AddField_management(os.path.join(subdir, file_name),
                                                       field_name="HZRD_SLOPE", field_type="FLOAT")
                             expression = "(!MEAN_1! - 20) / (70 - 20)"
-                            arcpy.CalculateField_management(in_table=os.path.join(subdir, filename),
+                            arcpy.CalculateField_management(in_table=os.path.join(subdir, file_name),
                                                             field="HZRD_SLOPE",
                                                             expression=expression,
                                                             expression_type="PYTHON_9.3")
-                            with arcpy.da.UpdateCursor(os.path.join(subdir, filename), ["HZRD_SLOPE"]) as cursor:
-                                for row in cursor:
-                                    if row[0] > 1:
-                                        row[0] = 1
-                                        cursor.updateRow(row)
+                            with arcpy.da.UpdateCursor(os.path.join(subdir, file_name), ["HZRD_SLOPE"]) as crsr:
+                                for rw in crsr:
+                                    if rw[0] > 1:
+                                        rw[0] = 1
+                                        crsr.updateRow(row)
 
                             # distance
-                            arcpy.AddField_management(os.path.join(subdir, filename),
+                            arcpy.AddField_management(os.path.join(subdir, file_name),
                                                       field_name="HZRD_DIST", field_type="FLOAT")
                             expression = "1 - !NEAR_DIST! / 2000"
-                            arcpy.CalculateField_management(in_table=os.path.join(subdir, filename),
+                            arcpy.CalculateField_management(in_table=os.path.join(subdir, file_name),
                                                             field="HZRD_DIST",
                                                             expression=expression,
                                                             expression_type="PYTHON_9.3")
 
                             # area
-                            arcpy.AddField_management(os.path.join(subdir, filename),
+                            arcpy.AddField_management(os.path.join(subdir, file_name),
                                                       field_name="HZRD_AREA", field_type="FLOAT")
                             expression = "!DEM_AREA! / !AREA!"
-                            arcpy.CalculateField_management(in_table=os.path.join(subdir, filename),
+                            arcpy.CalculateField_management(in_table=os.path.join(subdir, file_name),
                                                             field="HZRD_AREA",
                                                             expression=expression,
                                                             expression_type="PYTHON_9.3")
-                            with arcpy.da.UpdateCursor(os.path.join(subdir, filename), ["HZRD_AREA"]) as cursor:
-                                for row in cursor:
-                                    if row[0] > 1:
-                                        row[0] = 1
-                                        cursor.updateRow(row)
+                            with arcpy.da.UpdateCursor(os.path.join(subdir, file_name), ["HZRD_AREA"]) as crsr:
+                                for rw in cursor:
+                                    if rw[0] > 1:
+                                        rw[0] = 1
+                                        crsr.updateRow(rw)
 
                             # add field for final hazard classification of each slope
-                            arcpy.AddField_management(os.path.join(subdir, filename),
+                            arcpy.AddField_management(os.path.join(subdir, file_name),
                                                       field_name="HAZARD_NEW", field_type="FLOAT")
                             expression = "((!HZRD_AREA!*2) + !HZRD_DIST! + (!HZRD_SLOPE!*2) + (!HZRD_HGHT!/2)) / 5.5"
-                            arcpy.CalculateField_management(in_table=os.path.join(subdir, filename),
+                            arcpy.CalculateField_management(in_table=os.path.join(subdir, file_name),
                                                             field="HAZARD_NEW",
                                                             expression=expression,
                                                             expression_type="PYTHON_9.3")
-                            with arcpy.da.UpdateCursor(os.path.join(subdir, filename), ["HAZARD_NEW"]) as cursor:
-                                for row in cursor:
-                                    if row[0] > 1:
-                                        row[0] = 1
-                                        cursor.updateRow(row)
+                            with arcpy.da.UpdateCursor(os.path.join(subdir, file_name), ["HAZARD_NEW"]) as crsr:
+                                for rw in cursor:
+                                    if rw[0] > 1:
+                                        rw[0] = 1
+                                        crsr.updateRow(rw)
 
             # merge all slopes of the current class
-            matches = []
-            for subdir, dirs, files in os.walk(SINGLE_SLOPES):
-                for filename in files:
-                    if filename.endswith(".shp"):
-                        match = (os.path.join(subdir, filename))
-                        matches.append(match)
-            if matches:
+            matches_list = []
+            for subdir, dirs, files in os.walk(single_slopes):
+                for file_name in files:
+                    if file_name.endswith(".shp"):
+                        mtch = (os.path.join(subdir, file_name))
+                        matches_list.append(mtch)
+            if matches_list:
+                slopes_merged = sink_folder + "/merged_slopes"
                 try:
-                    SLOPES_MERGED = sinkfolder + "/merged_slopes"
-                    os.mkdir(SLOPES_MERGED)
+                    os.mkdir(slopes_merged)
                 except OSError:
-                    print ("Creation of the directory %s failed" % SLOPES_MERGED)
-                arcpy.Merge_management(matches,
-                                       SLOPES_MERGED + "/sink{}_merged_{}_to_{}.shp".format(sinkNr, threshold_low,
+                    print("Creation of the directory %s failed" % slopes_merged)
+                arcpy.Merge_management(matches_list,
+                                       slopes_merged + "/sink{}_merged_{}_to_{}.shp".format(sinknr, threshold_low,
                                                                                             threshold_high))
 
 
         # Step Four: Calculate hazards for all slopes
         # detect all slopes
-        for i in range(len(os.listdir(subfolder_SINKS))):
-            single_slope_calc(sinkNr=i, threshold_low=60, threshold_high=90)
-            single_slope_calc(sinkNr=i, threshold_low=40, threshold_high=60)
-            single_slope_calc(sinkNr=i, threshold_low=30, threshold_high=40)
+        for j in range(len(os.listdir(subfolder_SINKS))):
+            single_slope_calc(sinknr=j, threshold_low=60, threshold_high=90)
+            single_slope_calc(sinknr=j, threshold_low=40, threshold_high=60)
+            single_slope_calc(sinknr=j, threshold_low=30, threshold_high=40)
 
         print "Merge slopes of all classes for each sink"
-        for i in range(len(os.listdir(subfolder_SINKS))):
-            sinkfolder = subfolder_SINKS + "/sink" + str(i)
+        for j in range(len(os.listdir(subfolder_SINKS))):
+            sinkfolder = subfolder_SINKS + "/sink" + str(j)
 
             # see if the sink has critical slopes in the respective threshold category
             if os.path.exists(sinkfolder + "/merged_slopes"):
@@ -940,11 +940,11 @@ for i in glaciersToDo:
                         match = (os.path.join(sinkfolder + "/merged_slopes/" + filename))
                         matches.append(match)
             else:
-                print "Sink Nr. " + str(i) + " has no critical slopes."
-                output = "Sink Nr. " + str(i) + " has no critical slopes.\n"
-                file = open(current_path + "/error_messages.txt", "w")
-                file.write(output)
-                file.close()
+                print "Sink Nr. " + str(j) + " has no critical slopes."
+                output = "Sink Nr. " + str(j) + " has no critical slopes.\n"
+                text = open(current_path + "/error_messages.txt", "w")
+                text.write(output)
+                text.close()
                 continue
 
             # merge the different slope categories
@@ -953,9 +953,9 @@ for i in glaciersToDo:
         ############################################################################################
 
         # calculate hazard approximation mean
-        for i in range(len(os.listdir(subfolder_SINKS))):
-            print "working on sink " + str(i)
-            sinkfolder = subfolder_SINKS + "/sink" + str(i)
+        for j in range(len(os.listdir(subfolder_SINKS))):
+            print "working on sink " + str(j)
+            sinkfolder = subfolder_SINKS + "/sink" + str(j)
             arcpy.AddField_management(sinkfolder + "/sink.shp", field_name="HAZARD_NEW", field_type="FLOAT")
             arcpy.AddField_management(sinkfolder + "/sink.shp", field_name="HAZARD_MAX", field_type="FLOAT")
             arcpy.AddField_management(sinkfolder + "/sink.shp", field_name="IMPCT_AREA", field_type="FLOAT")
@@ -979,7 +979,7 @@ for i in glaciersToDo:
                             cursor.updateRow(row)
 
                 # calculate maximum hazard
-                hazards = [i[0] for i in
+                hazards = [j[0] for j in
                            arcpy.da.SearchCursor(sinkfolder + "/merged_slopes/all_merged.shp", "HAZARD_NEW")]
                 max_hazard = max(hazards)
                 with arcpy.da.UpdateCursor(sinkfolder + "/sink.shp", "HAZARD_MAX") as cursor:
@@ -996,11 +996,11 @@ for i in glaciersToDo:
                         row[0] = impact_area
                         cursor.updateRow(row)
             except RuntimeError:
-                print "Setting hazard level for sink Nr. " + str(i) + " to 0."
-                output = "Setting hazard level for sink Nr. " + str(i) + " to 0."
-                file = open(current_path + "/error_messages.txt", "a")
-                file.write(output)
-                file.close()
+                print "Setting hazard level for sink Nr. " + str(j) + " to 0."
+                output = "Setting hazard level for sink Nr. " + str(j) + " to 0."
+                text = open(current_path + "/error_messages.txt", "a")
+                text.write(output)
+                text.close()
                 with arcpy.da.UpdateCursor(sinkfolder + "/sink.shp", "HAZARD_NEW") as cursor:
                     for row in cursor:
                         row[0] = 0

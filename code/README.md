@@ -6,10 +6,10 @@ The main work is done by the python script *calculations.py*,
 which consists of two subsequent routines for all glaciers. 
 
 As a key function in ArcGIS (`region group`) sometimes breaks
-when handling large datasets, we recommend to outsource this step 
-to the `raster` package of R. With this, R steps in to provide the 
-necessary overdeepening identification for the second routine of 
-the python script. 
+when handling large datasets, we recommend outsourcing this step 
+to R, i.e. the `clump` function of the `raster` package. 
+With this, R steps in to provide the necessary overdeepening identification 
+for the second routine of the python script. 
 For more details, please see the header of *calculations.py*. 
 
 ### Required data
@@ -27,7 +27,8 @@ The python script was developed using the `arcpy` package af ArcGIS 10.7.
 Therefore, valid licences for several extensions of the ArcGIS software are needed, 
 i.e. the *3D Analyst*, the *Spatial Analyst*, 
 and the *Geostatistical Analyst*.
-While most of the code is written in Python 2.7, we use R 3.6.1 for some steps as well.
+While most of the code is written in Python 2.7 (in order to work with ArcGIS), 
+we use R 3.6.1 for some steps as well.
 
 ### Preprocessing
 Some preprocessing steps are not included in the scripts as they heavily depend on the employed
