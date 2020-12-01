@@ -7,6 +7,10 @@ only overdeepenings with a surface area >10<sup>5</sup>  m<sup>2</sup>.
 all subglacial overdeepenings in High Mountain Asia 
 with a surface area >10<sup>4</sup>  m<sup>2</sup>. 
 
+Both files are based on the scripts available in the
+[Code](https://github.com/cryotools/subglacial-overdeepenings/tree/master/code)
+section. 
+
 ### Metadata
 | Column name | Description |
 | ----------- | ----------- |
