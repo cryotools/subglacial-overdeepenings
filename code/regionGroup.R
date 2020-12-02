@@ -6,7 +6,7 @@
 # in High Mountain Asia - Modeling and Risk Analysis' (GLAMoR).
 # This script was written by Wilhelm Furian.
 # 
-# By running this script, the later python routine is able to uniquely identify each single overdeepening. 
+# By running this script, a subsequent python routine is able to uniquely identify each single overdeepening. 
 # Therefore, it is necessary for all file names to match the names in the python script!
 # This script can be used as a faster alternative to the region group function of arcpy, 
 # which apparently sometimes breaks when handling large datasets.
@@ -29,8 +29,8 @@ input <- input[!grepl('aux|vat|tfw|ovr|xml', input)]
 fun_regionGroup <- function(input){
   print(input)
   name <- as.character(input)
-  test <- raster(name)
-  regions <- clump(test) # region group alternative
+  r <- raster(name)
+  regions <- clump(r) # region group alternative
   out_path = paste0(substr(input[1],1,29),"sinksRegion.tif")
   writeRaster(regions, out_path,format = "GTiff", overwrite = TRUE)
 }
