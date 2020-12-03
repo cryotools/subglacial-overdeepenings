@@ -21,6 +21,15 @@
     - a DEM raster for the whole study area. For HMA, we recommend using the ALOS World 3D - 30m (AW3D30),
       available at https://www.eorc.jaxa.jp/ALOS/en/aw3d30/index.htm.
 
+    For the necessary data preprocessing please see the README file at
+    (https://github.com/cryotools/subglacial-overdeepenings/blob/master/code/README.md).
+
+    The required folder structure is very simple:
+        - a folder containing all the preprocessed ice thickness rasters for the respective RGI region
+        - the RGI glacier shapefile
+        - an empty folder for the data to be stored in (please make sure that enough disk space is available -
+          depending on the RGI region several GB of data will be stored in the process)
+
     The model is written in Python 2.7 and has been tested with ArcGIS 10.7 and PyCharm CE 2019.3.1.
     It needs the following ArcGIS extensions to be enabled:
     3D Analyst, Spatial Analyst and Geostatistical Analyst.
@@ -42,7 +51,6 @@ import os.path
 import arcpy
 from arcpy.sa import *
 import shutil
-import gc
 import re
 
 # checkout the necessary extensions for arcpy
@@ -51,18 +59,18 @@ arcpy.CheckOutExtension("3D")
 arcpy.CheckOutExtension("GeoStats")
 arcpy.env.overwriteOutput = True
 
-# prepare input paths
-# (at the moment, this has to be done manually for every RGI region)
-input_path = "~"                            # path to folder with all the preprocessed glacier thickness data
-input_path_raster = "~"                     # path to final glacier thickness rasters
+# prepare input paths (at the moment, this has to be done manually for every RGI region)
+input_path = "~"                     # path to folder with preprocessed glacier thickness rasters
 RGI_path = "~/14_rgi60_SouthAsiaWest.shp"   # absolute path to the RGI shapefile of the current region
-work_path = "~"                             # where should the files be saved
+work_path = "~"                             # where should the files be saved?
 
-# First Step: Find overdeepenings
-for raster in os.listdir(input_path_raster):
+# First Step: Identify overdeepenings
+for raster in os.listdir(input_path):
     if raster.startswith("RGI60") and raster.endswith(".tif"):
+        # if the input data does not follow Farinotti et al. (2019) the glacierID definition has to be changed
+        # files should be named as follows: RGI60-13.00001_thickness.tif
         glacierID = raster[:-14]
-        glacierLocation = input_path_raster + "/" + raster
+        glacierLocation = input_path + "/" + raster
         print glacierID
 
         # define several work folder connections
@@ -177,9 +185,9 @@ for raster in os.listdir(input_path_raster):
         for filename in os.listdir(subfolder_RGI):
             if filename.startswith("1") and filename.endswith(".shp"):
                 RGI_nr = str(filename)[0:2] + "." + str(filename)[3:8]
-                for tif in os.listdir(input_path + "/03_substracted"):
+                for tif in os.listdir(input_path):
                     if str(tif)[6:14] == RGI_nr:
-                        arcpy.CopyRaster_management(in_raster=input_path + "/03_substracted/" + tif,
+                        arcpy.CopyRaster_management(in_raster=input_path + tif,
                                                     out_rasterdataset=subfolder_TIF + "/" + str(tif)[6:8] + "_" + str(
                                                         tif)[9:14] + str(tif)[24:28])
 
@@ -273,14 +281,11 @@ for raster in os.listdir(input_path_raster):
                               clipping_geometry="ClippingGeometry")
         del outSinks_area
 
-        n = gc.collect()
-        print("Number of unreachable objects collected by GC: ", n)
-
 """
-Next, we need to region group all the overdeepenings in the bed of each glacier.
-Normally, this should be possible with arcpy, but there are still unresolved bugs in the region group routine.
-Therefore, we recommend to stop this script temporarily and switch to R for the next step.
-There, using the clump package will accomplish the same.
+Next, we need to give a unique ID to each overdeepening in the bed of each glacier.
+Normally, this should be possible with arcpy, but we encountered some problems with the RegionGroup function.
+Therefore, we recommend to stop this python script temporarily and switch to R for the next step.
+There, using the clump package will accomplish the same - and much faster than RegionGroup.
 """
 
 # Second Step: Calculate overdeepening properties
@@ -288,7 +293,6 @@ glaciersToDo = [name for name in os.listdir(work_path)]
 for i in glaciersToDo:
     if i.startswith("RGI"):
         glacierID = i
-        glacierLocation = input_path + "/01_original/" + glacierID[:8] + "." + glacierID[9:] + "_thickness.tif"
 
         # define several work folder connections
         current_path = work_path + "/" + glacierID
@@ -300,7 +304,7 @@ for i in glaciersToDo:
         subfolder_SINKS = current_path + "/single_sinks"
 
         print "convert to Int-raster and calculate attribute table for R-import"
-        outInt = Int(current_path + "/area_sinksRegion.tif")  # this is the file produced by R
+        outInt = Int(current_path + "/area_sinksRegion.tif")  # this is the file returned by R
         outInt.save(current_path + "/area_sinksRegionInt.tif")
         del outInt
         arcpy.BuildRasterAttributeTable_management(in_raster=current_path + "/area_sinksRegionInt.tif",
