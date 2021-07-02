@@ -31,7 +31,12 @@ section.
 ### Additional information
 
 For more insight into the calculation of each parameter, 
-please see the corresponding publication in the Journal of Glaciology (currently in review).
+please see the corresponding publication in the Journal of Glaciology:
+
+Furian, W., Loibl, D., & Schneider, C. (2021). 
+Future glacial lakes in High Mountain Asia: 
+An inventory and assessment of hazard potential from surrounding slopes. 
+Journal of Glaciology, 1-18. [doi:10.1017/jog.2021.18](https://doi.org/10.1017/jog.2021.18).
 
 At the moment, both LHL_MEAN and LHL_MAX are only available 
 for the shapefile containing the larger overdeepenings 
