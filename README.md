@@ -15,7 +15,13 @@ suspected GLOF hazard hotspots.
 The related study is part of the [GLAMoR](https://hu.berlin/glamor) project 
 (Future **G**lacial **L**akes in High Mountain **A**sia -
 **Mo**deling and **R**isk Analysis) at the Geography Department of 
-Humboldt-Universität zu Berlin. 
+Humboldt-Universität zu Berlin. The results of the study were published in the Journal of Glaciology:
+
+Furian, W., Loibl, D., & Schneider, C. (2021). 
+Future glacial lakes in High Mountain Asia: 
+An inventory and assessment of hazard potential from surrounding slopes. 
+Journal of Glaciology, 1-18. [doi:10.1017/jog.2021.18](https://doi.org/10.1017/jog.2021.18).
+
 
 ### Ressources
 This study builds on several resources:
